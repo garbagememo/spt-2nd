@@ -1,0 +1,126 @@
+# Scene Objects Configuration (Cornell Box)
+
+# ====================================================
+# カメラ設定（必要な場合）
+# ====================================================
+[camera]
+position = [50.0, 52.0, 295.6]
+direction = [0.0,  -0.042612, -1.0]
+width = 640
+height = 480
+samples = 16
+plane_distance = 140.0
+
+#==========wada============
+
+# R = 60.0
+# T = 30.0 deg (PI/6 rad)
+# D = R / cos(T) ≈ 69.282032
+
+# sky
+[[objects]]
+shape = "sphere"
+radius = 100000.0
+position = [50.0, 100.0, 0.0]
+emission = [3.0, 3.0, 3.0]
+color = [0.0, 0.0, 0.0]
+material = "DIFF"
+
+# grnd
+[[objects]]
+shape = "sphere"
+radius = 100000.0
+position = [50.0, -100129.282032, 0.0]
+emission = [0.0, 0.0, 0.0]
+color = [0.1, 0.1, 0.1]
+material = "DIFF"
+
+# red
+[[objects]]
+shape = "sphere"
+radius = 60.0
+position = [110.0, 75.441016, 62.0]
+emission = [0.0, 0.0, 0.0]
+color = [0.999, 0.2997, 0.2997]
+material = "SPEC"
+
+# grn
+[[objects]]
+shape = "sphere"
+radius = 60.0
+position = [-10.0, 75.441016, 62.0]
+emission = [0.0, 0.0, 0.0]
+color = [0.2997, 0.999, 0.2997]
+material = "SPEC"
+
+# blue
+[[objects]]
+shape = "sphere"
+radius = 60.0
+position = [50.0, -28.482032, 62.0]
+emission = [0.0, 0.0, 0.0]
+color = [0.2997, 0.2997, 0.999]
+material = "SPEC"
+
+# back
+[[objects]]
+shape = "sphere"
+radius = 60.0
+position = [50.0, 40.8, -7.282032]
+emission = [0.0, 0.0, 0.0]
+color = [0.52947, 0.52947, 0.52947]
+material = "SPEC"
+
+# front
+[[objects]]
+shape = "sphere"
+radius = 60.0
+position = [50.0, 40.8, 131.282032]
+emission = [0.0, 0.0, 0.0]
+color = [0.999, 0.999, 0.999]
+material = "REFR"
+
+# red (commented out)
+# [[objects]]
+# shape = "sphere"
+# radius = 60.0
+# position = [110.0, 69.641016, 60.0]
+# emission = [0.1, 0.1, 0.1]
+# color = [0.999, 0.999, 0.999]
+# material = "SPEC"
+
+# grn (commented out)
+# [[objects]]
+# shape = "sphere"
+# radius = 60.0
+# position = [-10.0, 69.641016, 60.0]
+# emission = [0.1, 0.1, 0.1]
+# color = [0.999, 0.999, 0.999]
+# material = "SPEC"
+
+# blue (commented out)
+# [[objects]]
+# shape = "sphere"
+# radius = 60.0
+# position = [50.0, -34.282032, 60.0]
+# emission = [0.1, 0.1, 0.1]
+# color = [0.999, 0.999, 0.999]
+# material = "SPEC"
+
+# back (commented out)
+# [[objects]]
+# shape = "sphere"
+# radius = 60.0
+# position = [50.0, 35.0, -50.851252]
+# emission = [0.0, 0.0, 0.0]
+# color = [0.274725, 0.611388, 0.948051]
+# material = "SPEC"
+
+# front (commented out)
+# [[objects]]
+# shape = "sphere"
+# radius = 60.0
+# position = [50.0, 40.8, 81.932441]
+# emission = [0.0, 0.0, 0.0]
+# color = [0.999, 0.999, 0.999]
+# material = "REFR"
