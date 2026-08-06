@@ -1,0 +1,28 @@
+# Material Library
+
+# (1)-a 左辺の面: (0.75, 0.25, 0.25) 赤系
+newmtl mat_box_left
+Kd 0.75 0.25 0.25
+Illum 2
+
+# (1)-b 右辺の面: (0.25, 0.25, 0.75) 青系
+newmtl mat_box_right
+Kd 0.25 0.25 0.75
+Illum 2
+
+# (1)-c Z=170の面: (0.0, 0.0, 0.0) 黒
+newmtl mat_box_top
+Kd 0.0 0.0 0.0
+Illum 2
+
+# (1)-d 直方体のその他の面用のデフォルトグレー
+newmtl mat_box_default
+Kd 0.5 0.5 0.5
+Illum 2
+
+# (2) 発光平面: 強度 10
+# PBR対応レンダラー向けにベースカラー(Kd)を白にし、発光(Ke)を10倍に設定しています。
+newmtl mat_emissive
+Kd 0.0 0.0 0.0
+Ke 10.0 10.0 10.0
+Illum 2
