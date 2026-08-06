@@ -31,7 +31,7 @@ type
    end;
 
 var
-    ObjFilePath:string='obj;
+    ObjFilePath:string='obj';
    
 implementation
 constructor ShapeListClass.create;
