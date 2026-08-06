@@ -574,11 +574,10 @@ end;
 
 function SPTOMLDocument.ObjKeyToVec3(OT:TOMLtable;KeyName:string):Vec3;
 var
-   Val:TOMLValue;
    PosArray:TOMLArray;
 begin
    PosArray := OT.GetArray(KeyName);
-   if (Val <> nil) then 
+   if (PosArray <> nil) then 
       result.new( PosArray[0].AsFloat,PosArray[1].AsFloat,PosArray[2].AsFloat);
 end;      
 
