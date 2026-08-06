@@ -90,7 +90,7 @@ begin
    AspectFlag:=false;
    c:=#0;
    repeat
-      c:=getopt('adl:m:o:s:t:w:');
+      c:=getopt('adm:o:s:t:w:T:O:h?');
       case c of
          'a':begin
                 AspectFlag:=true;
@@ -103,13 +103,19 @@ begin
                   modelnum:=ArgInt;
                   writeln ('model number=',ModelNum);
                end;
-         'l' : begin
+         'T' : begin
                   ArgFN:=OptArg;
                   if ArgFN<>'' then begin tomlFN:=ArgFN;
                      writeln ('TOML FileName =',tomlFN);
                      modelnum:=100;
                   end;   
                end;
+         'O' : begin
+                  ArgFN:=OptArg;
+                  if ArgFN<>'' then begin ObjFilePath:=ArgFN;
+                     writeln ('ObjFilePath =',tomlFN);
+                   end;   
+               end;                  
           'o' : begin
                   ArgFN:=OptArg;
                   if ArgFN<>'' then FN:=ArgFN;
@@ -131,16 +137,17 @@ begin
                   w:=ArgInt;h:=w *3 div 4;
                   writeln('w=',w,' ,h=',h);
                end;
-         '?',':' : begin
+         'h','?',':' : begin
                       writeln(' -a aspect 16:9 on');
                       writeln(' -d dump flag on');
-                      writeln(' -l [toml Filename]');
                       writeln(' -m [0..7,10,11,20,30] scene number');
                       writeln(' -o [finename] output filename');
                       writeln(' -s [samps] sampling count');
                       writeln(' -t [thread num]');
                       writeln(' -w [width] screen width pixel');
-                      halt;
+                      writeln(' -T [toml Filename]');
+                      writeln(' -O [obj file path]');
+                     halt;
                    end;
       end; { case }
    until c=endofoptions;
