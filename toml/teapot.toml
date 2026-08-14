@@ -1,0 +1,38 @@
+# Scene Objects Configuration (Cornell Box)
+
+# ====================================================
+# カメラ設定（必要な場合）
+# ====================================================
+[camera]
+position = [10.0, 300.0, 250.0]
+direction = [ 0.0,-300.0,-250.0]
+width = 640
+height = 480
+samples = 16
+plane_distance = 70.0
+
+
+
+
+#sky 
+[[objects]]
+shape = "sphere"
+radius = 10000.0
+position = [0.0, 0.0, 0.0]
+emission = [0.48, 0.4, 0.56]
+color = [0.7, 0.9, 1.0]
+material = "DIFF"
+
+# gnd
+[[objects]]
+shape = "sphere"
+radius = 100000.0
+position = [0.0, -100000.0, 0.0]
+emission = [0.0, 0.0, 0.0]
+color = [0.4, 0.4, 0.4]
+material = "DIFF"
+
+[[BVH]]
+name = "teapot"
+shape = "obj"
+filename = "teapot.obj"

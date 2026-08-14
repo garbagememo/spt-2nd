@@ -1,0 +1,50 @@
+# Scene Objects Configuration (Cornell Box)
+
+# ====================================================
+# カメラ設定（必要な場合）
+# ====================================================
+[camera]
+position = [-30.0, 450.0, 350.0]
+direction = [ 0.0,-300.0,-250.0]
+width = 640
+height = 480
+samples = 4
+plane_distance = 70.0
+
+[[objects]]
+name = "sky"
+shape = "sphere"
+radius = 10000.0
+position = [0.0, 0.0, 0.0]
+emission = [0.48, 0.4, 0.56]
+color = [0.7, 0.9, 1.0]
+material = "DIFF"
+
+[[objects]]
+name = "ball"
+shape = "sphere"
+radius = 50.0
+position = [-150.0, 50.1, -150.0]
+emission = [0.0, 0.0, 0.0]
+color = [0.5, 0.9, 1.0]
+material = "DIFF"
+texture = "bmp"
+bmp.filename = "globe.jpg"
+
+
+[[objects]]
+name = "ground"
+shape = "sphere"
+radius = 100000.0
+position = [0.0, -100000.0, 0.0]
+emission = [0.0, 0.0, 0.0]
+color = [0.4, 0.4, 0.4]
+material = "SPEC"
+texture = "ring"
+ring.center = [0.0, 0.0, 0.0]
+ring.modify = [0.0, -0.2, 0.0]
+
+[[BVH]]
+name = "bunny100"
+shape = "obj"
+filename = "bunny100.obj"
