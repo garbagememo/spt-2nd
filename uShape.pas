@@ -22,14 +22,17 @@ type
       function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;virtual;abstract;
       function IDStr:string;virtual;
    end;
+
    DiffuseClass = class(MaterialClass)
       function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
       function IDStr:string;override;
    end;
+
    MirrorClass = class(MaterialClass)
       function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
       function IDStr:string;override;
    end;
+
    RefractClass = class(MaterialClass)
       function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
       function IDStr:string;override;
@@ -42,6 +45,19 @@ type
       function GetColor(x:Vec3):Vec3;virtual;
    end;
 
+   RingTextureClass = class(TextureClass)
+      p,ColorDiff:Vec3;
+      constructor create(e_,c_,p_,cd_:Vec3);virtual;
+      function GetColor(x:Vec3):Vec3;override;
+   end;
+
+   SphereBMPTextureClass = class(TextureClass)
+      p:Vec3;
+      BMP:BMPRecord;
+      constructor create(e_,c_,p_:Vec3;FNPath,FN:string);virtual;
+      function GetColor(x:Vec3):Vec3;override;
+   end;
+   
    ShapeClass = class;
    
    HitInfo = record
@@ -231,6 +247,7 @@ begin
    result.r:=ray2.new(x,d);
    result.cpc:=1.0;
 end;
+
 function DiffuseClass.IDStr:string;
 begin
    result:='DIFF';
@@ -243,11 +260,11 @@ begin
    result.r:=ray2.new(x,r.d-nl*2*(nl*r.d) );//オリジナルはnlではなくnなので不安があるが
    result.cpc:=1.0;
 end;
+
 function MirrorClass.IDStr:string;
 begin
    result:='SPEC';
 end;
-
 
 function RefractClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
 var
@@ -282,6 +299,7 @@ begin
       result.cpc:=TP;
    end;
 end;
+
 function RefractClass.IDStr:string;
 begin
    result:='REFR';
@@ -313,5 +331,46 @@ begin
    end;
 end;
 
+constructor RingTextureClass.create(e_,c_,p_,cd_:Vec3);
 begin
+   p:=p_;
+   ColorDiff:=cd_;
+   inherited create(e_,c_);
+end;
+
+
+function RingTextureClass.GetColor(x:Vec3):Vec3;
+begin
+   result:=c;
+   if ((p-x).len mod 100) >50 then begin
+      result:=result+ColorDiff;
+   end ;
+end;
+
+constructor SphereBMPTextureClass.create(e_,c_,p_:Vec3;FNPath,FN:string);
+var
+   FPFN:string;
+begin
+   p:=p_;
+      if FNPath <> '' then
+      FPFN := IncludeTrailingPathDelimiter(FNPath) + FN
+   else
+      FPFN := FN;
+
+   if not FileExists(FPFN) then Exit;
+
+   BMP.readFile(FPFN);
+   inherited create(e_,c_);
+end;   
+
+function SphereBMPTextureClass.GetColor(x:Vec3):Vec3;
+var
+   uv:Vec2;
+begin
+   uv:=uv.DirToUV(x-self.p);
+   result:=RGBtoColor(BMP.GetPixel(trunc(BMP.bmpWidth*uv.u),trunc(BMP.bmpHeight*uv.v)));
+end;
+
+begin
+  
 end.

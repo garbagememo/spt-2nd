@@ -80,7 +80,7 @@ var
 var
    ThreadAry:array[0..MaxThread-1] of TMyThread;
 begin
-   
+   tomlFN:='./toml/original-scene.toml';
    ThreadNum:=8;
    modelnum:=0;
    FN:='out.png';

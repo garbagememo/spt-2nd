@@ -105,7 +105,7 @@ type
     procedure Clear;
     procedure LoadFromString(const AContent: String);
     procedure LoadFromFile(const AFileName: String);
-//GetValueByPath('camera.width'): ドット区切りのパス表記による値の参照にも対応しています。
+    // GetValueByPath('camera.width'): ドット区切りのパス表記による値の参照にも対応しています。
     function GetValueByPath(const APath: String): TOMLValue;
 
     property Root: TOMLTable read FRoot;
@@ -127,9 +127,6 @@ type
       procedure AddBVHList(var sc:SceneRecord);
       property BVHCount:integer read FBVHCount;
    end;
-
-   
-
 
   
 implementation
@@ -208,78 +205,81 @@ end;
 
 procedure TOMLTable.Add(const AKey: String; AValue: TOMLValue);
 begin
-  FDict.AddOrSetValue(LowerCase(AKey), AValue);
+   FDict.AddOrSetValue(LowerCase(AKey), AValue);
 end;
 
 function TOMLTable.Find(const AKey: String): TOMLValue;
 begin
-  if not FDict.TryGetValue(LowerCase(AKey), Result) then
-    Result := nil;
+   if not FDict.TryGetValue(LowerCase(AKey), Result) then
+      Result := nil;
 end;
 
 function TOMLTable.GetTable(const AKey: String): TOMLTable;
 var
-  V: TOMLValue;
+   V: TOMLValue;
 begin
-  V := Find(AKey);
-  if (V <> nil) and (V.ValueType = tvtTable) then Result := V.AsTable
-  else Result := nil;
+   V := Find(AKey);
+   if (V <> nil) and (V.ValueType = tvtTable) then Result := V.AsTable
+   else Result := nil;
 end;
 
 function TOMLTable.GetArray(const AKey: String): TOMLArray;
 var
-  V: TOMLValue;
+   V: TOMLValue;
 begin
-  V := Find(AKey);
-  if (V <> nil) and (V.ValueType = tvtArray) then Result := V.AsArray
-  else Result := nil;
+   V := Find(AKey);
+   if (V <> nil) and (V.ValueType = tvtArray) then Result := V.AsArray
+   else Result := nil;
 end;
 
 function TOMLTable.GetString(const AKey: String; const ADefault: String): String;
-var V: TOMLValue;
+var
+   V: TOMLValue;
 begin
-  V := Find(AKey);
-  if (V <> nil) and (V.ValueType = tvtString) then Result := V.AsString else Result := ADefault;
+   V := Find(AKey);
+   if (V <> nil) and (V.ValueType = tvtString) then Result := V.AsString else Result := ADefault;
 end;
 
 function TOMLTable.GetInt(const AKey: String; const ADefault: Int64): Int64;
-var V: TOMLValue;
+var
+   V: TOMLValue;
 begin
   V := Find(AKey);
   if (V <> nil) and (V.ValueType = tvtInteger) then Result := V.AsInt else Result := ADefault;
 end;
 
 function TOMLTable.GetFloat(const AKey: String; const ADefault: Double): Double;
-var V: TOMLValue;
+var
+   V: TOMLValue;
 begin
-  V := Find(AKey);
-  if V <> nil then
-  begin
-    if V.ValueType = tvtFloat then Exit(V.AsFloat);
-    if V.ValueType = tvtInteger then Exit(V.AsInt);
-  end;
-  Result := ADefault;
+   V := Find(AKey);
+   if V <> nil then begin
+      if V.ValueType = tvtFloat then Exit(V.AsFloat);
+      if V.ValueType = tvtInteger then Exit(V.AsInt);
+   end;
+   Result := ADefault;
 end;
 
 function TOMLTable.GetBool(const AKey: String; const ADefault: Boolean): Boolean;
-var V: TOMLValue;
+var
+   V: TOMLValue;
 begin
-  V := Find(AKey);
-  if (V <> nil) and (V.ValueType = tvtBoolean) then Result := V.AsBool else Result := ADefault;
+   V := Find(AKey);
+   if (V <> nil) and (V.ValueType = tvtBoolean) then Result := V.AsBool else Result := ADefault;
 end;
 
 { TOMLArray Implementation }
 
 constructor TOMLArray.Create;
 begin
-  inherited Create;
-  FList := specialize TObjectList<TOMLValue>.Create(True);
+   inherited Create;
+   FList := specialize TObjectList<TOMLValue>.Create(True);
 end;
 
 destructor TOMLArray.Destroy;
 begin
-  FList.Free;
-  inherited Destroy;
+   FList.Free;
+   inherited Destroy;
 end;
 
 procedure TOMLArray.Add(AValue: TOMLValue);
@@ -289,136 +289,129 @@ end;
 
 function TOMLArray.GetCount: Integer;
 begin
-  Result := FList.Count;
+   Result := FList.Count;
 end;
 
 function TOMLArray.GetItem(AIndex: Integer): TOMLValue;
 begin
-  Result := FList[AIndex];
+   Result := FList[AIndex];
 end;
 
 { TOMLDocument Implementation }
 
 constructor TOMLDocument.Create;
 begin
-  inherited Create;
-  FRoot := TOMLTable.Create;
+   inherited Create;
+   FRoot := TOMLTable.Create;
 end;
 
 destructor TOMLDocument.Destroy;
 begin
-  FRoot.Free;
-  inherited Destroy;
+   FRoot.Free;
+   inherited Destroy;
 end;
 
 procedure TOMLDocument.Clear;
 begin
-  FRoot.Free;
-  FRoot := TOMLTable.Create;
+   FRoot.Free;
+   FRoot := TOMLTable.Create;
 end;
 
 // クォート外のコメント（# ...）を除去
 function TOMLDocument.StripComment(const ALine: String): String;
 var
-  I: Integer;
-  InQuote: Boolean;
-  QuoteChar: Char;
+   I: Integer;
+   InQuote: Boolean;
+   QuoteChar: Char;
 begin
-  InQuote := False;
-  QuoteChar := #0;
-  for I := 1 to Length(ALine) do
-  begin
-    if (ALine[I] = '"') or (ALine[I] = '''') then
-    begin
-      if not InQuote then begin InQuote := True; QuoteChar := ALine[I]; end
-      else if ALine[I] = QuoteChar then InQuote := False;
-    end
-    else if (ALine[I] = '#') and not InQuote then
-      Exit(Copy(ALine, 1, I - 1));
-  end;
-  Result := ALine;
+   InQuote := False;
+   QuoteChar := #0;
+   for I := 1 to Length(ALine) do begin
+      if (ALine[I] = '"') or (ALine[I] = '''') then begin
+         if not InQuote then begin InQuote := True; QuoteChar := ALine[I]; end
+         else if ALine[I] = QuoteChar then InQuote := False;
+      end
+      else if (ALine[I] = '#') and not InQuote then
+         Exit(Copy(ALine, 1, I - 1));
+   end;
+   Result := ALine;
 end;
 
 // インライン配列 [1, 2, 3] 内の要素分割処理
 function TOMLDocument.SplitArrayElements(const AContent: String): TStringList;
 var
-  I, BracketDepth: Integer;
-  Ch, QuoteChar: Char;
-  InQuote: Boolean;
-  CurToken: String;
+   I, BracketDepth: Integer;
+   Ch, QuoteChar: Char;
+   InQuote: Boolean;
+   CurToken: String;
 begin
-  Result := TStringList.Create;
-  InQuote := False; QuoteChar := #0; BracketDepth := 0; CurToken := '';
+   Result := TStringList.Create;
+   InQuote := False; QuoteChar := #0; BracketDepth := 0; CurToken := '';
 
-  for I := 1 to Length(AContent) do
-  begin
-    Ch := AContent[I];
-    if InQuote then
-    begin
-      CurToken := CurToken + Ch;
-      if Ch = QuoteChar then InQuote := False;
-    end
-    else
-    begin
-      if (Ch = '"') or (Ch = '''') then begin InQuote := True; QuoteChar := Ch; CurToken := CurToken + Ch; end
-      else if (Ch = '[') or (Ch = '{') then begin Inc(BracketDepth); CurToken := CurToken + Ch; end
-      else if (Ch = ']') or (Ch = '}') then begin Dec(BracketDepth); CurToken := CurToken + Ch; end
-      else if (Ch = ',') and (BracketDepth = 0) then begin Result.Add(Trim(CurToken)); CurToken := ''; end
-      else CurToken := CurToken + Ch;
-    end;
-  end;
-  if Trim(CurToken) <> '' then Result.Add(Trim(CurToken));
+   for I := 1 to Length(AContent) do begin
+      Ch := AContent[I];
+      if InQuote then begin
+         CurToken := CurToken + Ch;
+         if Ch = QuoteChar then InQuote := False;
+      end
+      else begin
+         if (Ch = '"') or (Ch = '''') then begin InQuote := True; QuoteChar := Ch; CurToken := CurToken + Ch; end
+         else if (Ch = '[') or (Ch = '{') then begin Inc(BracketDepth); CurToken := CurToken + Ch; end
+         else if (Ch = ']') or (Ch = '}') then begin Dec(BracketDepth); CurToken := CurToken + Ch; end
+         else if (Ch = ',') and (BracketDepth = 0) then begin Result.Add(Trim(CurToken)); CurToken := ''; end
+         else CurToken := CurToken + Ch;
+      end;
+   end;
+   if Trim(CurToken) <> '' then Result.Add(Trim(CurToken));
 end;
 
 // 文字列値を解析して TOMLValue に変換
 function TOMLDocument.ParseValue(const AValStr: String): TOMLValue;
 var
-  S, SubStr: String;
-  FS: TFormatSettings;
-  IntVal: Int64;
-  FloatVal: Double;
-  ArrVal: TOMLValue;
-  ElemStrings: TStringList;
-  I: Integer;
+   S, SubStr: String;
+   FS: TFormatSettings;
+   IntVal: Int64;
+   FloatVal: Double;
+   ArrVal: TOMLValue;
+   ElemStrings: TStringList;
+   I: Integer;
 begin
-  FS := DefaultFormatSettings;
-  FS.DecimalSeparator := '.';
-  S := Trim(AValStr);
+   FS := DefaultFormatSettings;
+   FS.DecimalSeparator := '.';
+   S := Trim(AValStr);
 
-  // 文字列 ("..." または '...')
-  if (Length(S) >= 2) and (((S[1] = '"') and (S[Length(S)] = '"')) or ((S[1] = '''') and (S[Length(S)] = ''''))) then
-    Exit(TOMLValue.CreateString(Copy(S, 2, Length(S) - 2)));
+   // 文字列 ("..." または '...')
+   if (Length(S) >= 2) and (((S[1] = '"') and (S[Length(S)] = '"')) or ((S[1] = '''') and (S[Length(S)] = ''''))) then
+      Exit(TOMLValue.CreateString(Copy(S, 2, Length(S) - 2)));
 
-  // ブール値
-  if SameText(S, 'true') then Exit(TOMLValue.CreateBool(True));
-  if SameText(S, 'false') then Exit(TOMLValue.CreateBool(False));
+   // ブール値
+   if SameText(S, 'true') then Exit(TOMLValue.CreateBool(True));
+   if SameText(S, 'false') then Exit(TOMLValue.CreateBool(False));
 
-  // 配列 [...]
-  if (Length(S) >= 2) and (S[1] = '[') and (S[Length(S)] = ']') then
-  begin
-    SubStr := Trim(Copy(S, 2, Length(S) - 2));
-    ArrVal := TOMLValue.CreateArray;
-    if SubStr <> '' then
-    begin
-      ElemStrings := SplitArrayElements(SubStr);
-      try
-        for I := 0 to ElemStrings.Count - 1 do
-          ArrVal.AsArray.Add(ParseValue(ElemStrings[I]));
-      finally
-        ElemStrings.Free;
+   // 配列 [...]
+   if (Length(S) >= 2) and (S[1] = '[') and (S[Length(S)] = ']') then begin
+      SubStr := Trim(Copy(S, 2, Length(S) - 2));
+      ArrVal := TOMLValue.CreateArray;
+      if SubStr <> '' then begin
+         ElemStrings := SplitArrayElements(SubStr);
+         try
+            for I := 0 to ElemStrings.Count - 1 do
+               ArrVal.AsArray.Add(ParseValue(ElemStrings[I]));
+         finally
+            ElemStrings.Free;
+         end;
       end;
-    end;
-    Exit(ArrVal);
-  end;
+      Exit(ArrVal);
+   end;
 
-  // 整数値
-  if TryStrToInt64(S, IntVal) then Exit(TOMLValue.CreateInt(IntVal));
+   // 整数値
+   if TryStrToInt64(S, IntVal) then Exit(TOMLValue.CreateInt(IntVal));
 
-  // 浮動小数点数
-  if TryStrToFloat(S, FloatVal, FS) then Exit(TOMLValue.CreateFloat(FloatVal));
+   // 浮動小数点数
+   if TryStrToFloat(S, FloatVal, FS) then Exit(TOMLValue.CreateFloat(FloatVal));
 
-  // フォールバック（クォートなし文字列など）
-  Result := TOMLValue.CreateString(S);
+   // フォールバック（クォートなし文字列など）
+   Result := TOMLValue.CreateString(S);
 end;
 
 function TOMLDocument.GetOrCreateTable(ARootTable: TOMLTable; const APath: String): TOMLTable;
@@ -452,11 +445,11 @@ var
    ArrVal, NewTableVal: TOMLValue;
 begin
    Parts := APath.Split(['.']);
-   if Length(Parts) = 1 then  begin
+   if Length(Parts) = 1 then begin
       ParentTable := ARootTable;
       ArrayKey := Trim(Parts[0]);
    end
-   else  begin
+   else begin
       ParentPath := '';
       for I := 0 to High(Parts) - 1 do begin
          if I > 0 then ParentPath := ParentPath + '.';
@@ -480,9 +473,10 @@ end;
 procedure TOMLDocument.LoadFromString(const AContent: String);
 var
    Lines: TStringList;
-   I, EqPos: Integer;
-   Line, Key, Val, CurrentSection: String;
-   CurTable: TOMLTable;
+   I, J, EqPos: Integer;
+   Line, Key, Val, CurrentSection, SubPath: String;
+   CurTable, TargetTable: TOMLTable;
+   Parts: TStringArray;
 begin
    Clear;
    Lines := TStringList.Create;
@@ -514,7 +508,20 @@ begin
          if EqPos > 0 then begin
             Key := Trim(Copy(Line, 1, EqPos - 1));
             Val := Trim(Copy(Line, EqPos + 1, Length(Line) - EqPos));
-            CurTable.Add(Key, ParseValue(Val));
+
+            // ドット記法 (例: ring.inner_radius = 10.0) のサポート
+            Parts := Key.Split(['.']);
+            if Length(Parts) > 1 then begin
+               SubPath := '';
+               for J := 0 to High(Parts) - 1 do begin
+                  if J > 0 then SubPath := SubPath + '.';
+                  SubPath := SubPath + Trim(Parts[J]);
+               end;
+               TargetTable := GetOrCreateTable(CurTable, SubPath);
+               TargetTable.Add(Trim(Parts[High(Parts)]), ParseValue(Val));
+            end else begin
+               CurTable.Add(Key, ParseValue(Val));
+            end;
          end;
       end;
    finally
@@ -535,7 +542,7 @@ begin
   end;
 end;
 
-//GetValueByPath('camera.width'): ドット区切りのパス表記による値の参照にも対応しています。
+// GetValueByPath('camera.width'): ドット区切りのパス表記による値の参照にも対応しています。
 function TOMLDocument.GetValueByPath(const APath: String): TOMLValue;
 var
   Parts: TStringArray;
@@ -584,10 +591,10 @@ end;
 function SPTOMLDocument.GetShapeList:ShapeListClass;
 var
    ObjArrayVal: TOMLValue;
-   PosArray: TOMLArray;
-   ObjTable: TOMLTable;
+   ObjTable,TextureTable: TOMLTable;
    i: integer;
    ShapeList:ShapeListClass;
+   sh:ShapeClass;
    r:real;c,e,p:Vec3;refl:RefType;
 begin
    // 'objects' 全体の配列を取得
@@ -606,7 +613,22 @@ begin
             e:=ObjKeyToVec3(ObjTable,'emission');
             c:=ObjKeyToVec3(ObjTable,'color');
             refl:=StrToRefl(ObjTable.GetString('material') );
-            ShapeList.add(SphereClass.Create(r,p,e,c,refl) );
+            sh:=SphereClass.Create(r,p,e,c,refl);
+            if ObjTable.GetString('texture')<>'' then begin
+               TextureTable := ObjTable.GetTable('ring');
+               if TextureTable <> nil  then begin
+                  sh.tx:=RingTextureClass.create(e,c,
+                                                 ObjKeyToVec3(TextureTable,'center'),
+                                                 ObjKeyToVec3(TextureTable,'modify'));
+               end;
+               TextureTable := ObjTable.GetTable('bmp');
+               if TextureTable<>nil then begin
+                  sh.tx:=SphereBMPTextureClass.create(e,c,SphereClass(sh).p,
+                                                      ObjFilePath,
+                                                      TextureTable.GetString('filename'));
+                  end;
+            end;            
+            ShapeList.add(sh );
          end
          else if ObjTable.GetString('shape')='obj' then begin
             ShapeList.LoadObj(ObjFilePath,ObjTable.GetString('filename') );
@@ -679,8 +701,8 @@ begin
    d:=KeyToVec3('camera.direction');
    if isINF(d) then d:=DefaultDirection;
    result:=cam.new(o,d,w,h,samps);
+   cam.PlaneDist:=dist;
 end;
 
 begin
 end.
-   

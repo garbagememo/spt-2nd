@@ -18,6 +18,8 @@ type
    
    BVHListClass = class(ShapeListClass)
       bvh:BVHNodeClass;
+      cen:Vec3;
+      radius:real;
       function intersect(const r:RayRecord):HitInfo;override;
       procedure LoadObj(ObjPath:string;FN:string);override;
       procedure MakeBVHNode;
@@ -93,6 +95,10 @@ begin
    writeln('bvh sph.count=',shapes.count);
    for i:=0 to shapes.count-1 do ary[i]:=i;
    bvh:=BVHNodeClass.Create(ary,0,high(ary),shapes);
+   cen.x:=(bvh.root.little.x+bvh.root.large.x)/2;
+   cen.y:=(bvh.root.little.y+bvh.root.large.y)/2;
+   cen.z:=(bvh.root.little.z+bvh.root.large.z)/2;
+   radius:=(bvh.root.large-cen).len;
 end;
 
 procedure BVHListClass.LoadObj(ObjPath:string;FN: string);
@@ -111,7 +117,7 @@ end;
 
 function SceneRecord.Radiance(const r:RayRecord;depth:integer):Vec3;
 var
-   f,d,x,n,nl:Vec3;
+   f,x,n,nl:Vec3;
    p:real;
    hit,hit2:HitInfo;
    tInfo:TraceInfo;
@@ -137,7 +143,7 @@ begin
    n:=hit.obj.GetNorm(x);
    if n.dot(r.d)<0 then nl:=n else nl:=n*-1;
    f := hit.obj.tx.getColor(x);
-   p:=Max(f.x,Max(f.y,f.z));
+   p:=Max(f.r,Max(f.g,f.b));
    if (depth>5) then begin
       if random<p then 
          f:=f/p 

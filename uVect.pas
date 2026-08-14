@@ -7,9 +7,9 @@ unit uVect;
 interface
 
 uses
-{$ifdef unix}
+   {$ifdef unix}
    cwstring, // ← Linux/Unix環境でUTF-8(System/WideString)を正しく扱うために必須
-{$endif}
+   {$endif}
    sysutils,uBMP,math;
 
 const
@@ -18,28 +18,32 @@ const
    INF=1e20;
 
 type
-    Vec3=record
-        x,y,z:real;
-        function new(x_,y_,z_:real):Vec3;
-        function Norm:Vec3;inline;
-        function len:real;inline;
-        function Dot(const V2 :Vec3):real;inline;//内積
-        function Cross(const V2 :Vec3):Vec3;inline;//外積
-        function Mult(const V2:Vec3):Vec3;inline;
-        function Neg:Vec3;
-        class operator * (const v1: Vec3; const r: real): Vec3; inline;
-        class operator / (const v1: Vec3; const r: real): Vec3; inline;
-        class operator * (const v1, v2: Vec3): real; inline; // 内積
-        class operator / (const v1, v2: Vec3): Vec3; inline; // 外積
-        class operator + (const v1, v2: Vec3): Vec3; inline;
-        class operator - (const v1, v2: Vec3): Vec3; inline;
-        class operator + (const v1: Vec3; const r: real): Vec3; inline;
-        class operator - (const v1: Vec3; const r: real): Vec3; inline;        
-    end;
-    RayRecord=record
-       o, d:Vec3;
-       function new(o_,d_:Vec3):RayRecord;
-    end;
+   Vec3=record
+      x,y,z:real;
+      function new(x_,y_,z_:real):Vec3;
+      function Norm:Vec3;inline;
+      function len:real;inline;
+      function Dot(const V2 :Vec3):real;inline;//内積
+      function Cross(const V2 :Vec3):Vec3;inline;//外積
+      function Mult(const V2:Vec3):Vec3;inline;
+      function Neg:Vec3;
+      class operator * (const v1: Vec3; const r: real): Vec3; inline;
+      class operator / (const v1: Vec3; const r: real): Vec3; inline;
+      class operator * (const v1, v2: Vec3): real; inline; // 内積
+      class operator / (const v1, v2: Vec3): Vec3; inline; // 外積
+      class operator + (const v1, v2: Vec3): Vec3; inline;
+      class operator - (const v1, v2: Vec3): Vec3; inline;
+      class operator + (const v1: Vec3; const r: real): Vec3; inline;
+      class operator - (const v1: Vec3; const r: real): Vec3; inline;
+      property r: Real read x write x;
+      property g: Real read y write y;
+      property b: Real read z write z;
+   end;
+   
+   RayRecord=record
+      o, d:Vec3;
+      function new(o_,d_:Vec3):RayRecord;
+   end;
     
    CamRecord=record
       o,d:Vec3;
@@ -50,9 +54,15 @@ type
       function GetRay(x,y,sx,sy:integer):RayRecord;
       procedure CamWrite;
    end;
-   
+
+   Vec2=record
+      u,v:real;
+      function DirToUV(d:Vec3):Vec2;
+   end;
+      
    function ClampVector(v:Vec3):Vec3;
    function ColToRGB(v:Vec3):rgbColor;
+   function RGBtoColor(c:rgbColor):Vec3;inline;
 const
    BackGroundColor:Vec3 = (x:0;y:0;z:0);
    ZeroVec:Vec3 = (x:0;y:0;z:0);
@@ -192,18 +202,11 @@ begin
    result.z := v1.z - r;
 end;
 
-function Clamp(x:real):real;inline;
-begin
-   if x<0 then exit(0);
-   if x>1 then exit(1);
-   exit(x);
-end;
-
 function ClampVector(v:Vec3):Vec3;
 begin
-  result.x:=clamp(v.x);
-  result.y:=clamp(v.y);
-  result.z:=clamp(v.z);
+  result.r:=EnsureRange(v.r,0,1);
+  result.g:=EnsureRange(v.g,0,1);
+  result.b:=EnsureRange(v.b,0,1);
 end;
 
 function ColToWord(x:real):Word;inline;
@@ -213,14 +216,21 @@ end;
 
 function ColToRGB(v:Vec3):rgbColor;
 begin
-    result.r:=ColToWord(v.x);
-    result.g:=ColToWord(v.y);
-    result.b:=ColToWord(v.z);
+    result.r:=ColToWord(v.r);
+    result.g:=ColToWord(v.g);
+    result.b:=ColToWord(v.b);
+end;
+
+function RGBtoColor(c:rgbColor):Vec3;inline;
+begin
+   result.r:=c.r/MAX_WORD;
+   result.g:=c.g/MAX_WORD;
+   result.b:=c.b/MAX_WORD;
 end;
 
 function CamRecord.new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;
 begin
-  o:=o_;d:=d_;w:=w_;h:=h_;samps:=samps_;
+  o:=o_;d:=d_.norm;w:=w_;h:=h_;samps:=samps_;
   cx.new(w * 0.5135 / h, 0, 0);
   cy:= (cx/ d).norm* 0.5135;
   PlaneDist:=140;
@@ -268,6 +278,20 @@ begin
    write(' r.d=');VecWriteln(r.d);
 end;
 
+
+function Vec2.DirToUV(d:Vec3):Vec2;
+var
+  ClampedZ: Double;
+begin
+   d:=d.norm;
+   Result.U := 0.5 - (ArcTan2(D.Z, D.X) / (2.0 * Pi));
+
+   // ArcSin に渡す値のクランプ (-1.0 ～ 1.0) で NaN を防止
+   ClampedZ := EnsureRange(D.Y, -1.0, 1.0);
+   
+   // 上が V=0 の場合
+   Result.V := 0.5 + (ArcSin(ClampedZ) / Pi);
+end;
   
 begin
 end.
