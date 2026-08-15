@@ -289,7 +289,7 @@ begin
    // ArcSin に渡す値のクランプ (-1.0 ～ 1.0) で NaN を防止
    ClampedZ := EnsureRange(D.Y, -1.0, 1.0);
    
-   // 上が V=0 の場合
+   // 下が V=0 の場合
    Result.V := 0.5 + (ArcSin(ClampedZ) / Pi);
 end;
   

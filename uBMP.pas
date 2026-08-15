@@ -60,44 +60,40 @@ var
    x,y:integer;
 begin
    image := TFPMemoryImage.Create (bmpWidth,bmpHeight);
+   for y:=0 to bmpHeight-1 do
+      for x:=0 to bmpWidth-1 do 
+         image.colors[x,bmpHeight-y-1]:=FPColor(bmpBody[y*bmpWidth+x].r, 
+                                                bmpBody[y*bmpWidth+x].g, 
+                                                bmpBody[y*bmpWidth+x].b);
+   
+   Ext := LowerCase(ExtractFileExt(FN));
+   Writer := nil;
+
+   // 拡張子判定でライターを選択
+   if (Ext = '.ppm') or (Ext = '.pnm') then begin
+      Writer := TFPWriterPNM.Create;
+      TFPWriterPNM(Writer).BinaryFormat := false;
+   end
+   else if Ext = '.png' then begin
+      Writer := TFPWriterPNG.Create;
+      TFPWriterPNG(Writer).WordSized:=false;
+   end
+   else if Ext = '.bmp' then
+      Writer := TFPWriterBMP.Create
+   else
+   begin
+      WriteLn('未対応の拡張子のためファイル名をout.pngに ');
+      FN:='out.png';
+      Writer := TFPWriterPNG.Create;
+      TFPWriterPNG(Writer).WordSized:=false;
+   end;
+
    try
-      for y:=0 to bmpHeight-1 do
-         for x:=0 to bmpWidth-1 do 
-            image.colors[x,bmpHeight-y-1]:=FPColor(bmpBody[y*bmpWidth+x].r, 
-                                                   bmpBody[y*bmpWidth+x].g, 
-                                                   bmpBody[y*bmpWidth+x].b);
-      
-      Ext := LowerCase(ExtractFileExt(FN));
-      Writer := nil;
-
-      // 拡張子判定でライターを選択
-      if (Ext = '.ppm') or (Ext = '.pnm') then begin
-         Writer := TFPWriterPNM.Create;
-         TFPWriterPNM(Writer).BinaryFormat := false;
-      end
-      else if Ext = '.png' then begin
-         Writer := TFPWriterPNG.Create;
-         TFPWriterPNG(Writer).WordSized:=false;
-      end
-      else if Ext = '.bmp' then
-         Writer := TFPWriterBMP.Create
-      else
-      begin
-         WriteLn('未対応の拡張子のためファイル名をout.pngに ');
-         FN:='out.png';
-         Writer := TFPWriterPNG.Create;
-         TFPWriterPNG(Writer).WordSized:=false;
-      end;
-
-      try
-         WriteLn('保存中: ', FN, ' (フォーマット: ', UpperCase(Copy(Ext, 2, Length(Ext))), ')');
-         Image.SaveToFile(FN, Writer);
-         WriteLn('保存が完了しました。');
-      finally
-         Writer.Free;
-      end;
+      WriteLn('保存中: ', FN, ' (フォーマット: ', UpperCase(Copy(Ext, 2, Length(Ext))), ')');
+      Image.SaveToFile(FN, Writer);
+      WriteLn('保存が完了しました。');
    finally
-      Image.Free;
+      Writer.Free;
    end;
 end;
 
