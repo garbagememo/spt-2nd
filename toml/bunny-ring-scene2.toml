@@ -6,8 +6,8 @@
 [camera]
 position = [-30.0, 450.0, 350.0]
 direction = [ 0.0,-300.0,-250.0]
-width = 640
-height = 480
+width = 1920
+height = 1080
 samples = 4
 plane_distance = 70.0
 
