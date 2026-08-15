@@ -14,6 +14,7 @@ uses
 
 const
    MAX_WORD = High(WORD);
+   rev_max_word= 1/MAX_WORD;
    eps=1e-4;
    INF=1e20;
 
@@ -223,9 +224,9 @@ end;
 
 function RGBtoColor(c:rgbColor):Vec3;inline;
 begin
-   result.r:=c.r/MAX_WORD;
-   result.g:=c.g/MAX_WORD;
-   result.b:=c.b/MAX_WORD;
+   result.r:=c.r*rev_MAX_WORD;
+   result.g:=c.g*rev_MAX_WORD;
+   result.b:=c.b*rev_MAX_WORD;
 end;
 
 function CamRecord.new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;
@@ -284,10 +285,10 @@ var
   ClampedZ: Double;
 begin
    d:=d.norm;
-   Result.U := 0.5 - (ArcTan2(D.Z, D.X) / (2.0 * Pi));
+   Result.U := 0.5 - (ArcTan2(d.z, d.x) / (2.0 * Pi));
 
    // ArcSin に渡す値のクランプ (-1.0 ～ 1.0) で NaN を防止
-   ClampedZ := EnsureRange(D.Y, -1.0, 1.0);
+   ClampedZ := EnsureRange(d.y, -1.0, 1.0);
    
    // 下が V=0 の場合
    Result.V := 0.5 + (ArcSin(ClampedZ) / Pi);

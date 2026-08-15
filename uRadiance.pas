@@ -19,7 +19,6 @@ type
    BVHListClass = class(ShapeListClass)
       bvh:BVHNodeClass;
       cen:Vec3;
-      radius:real;
       function intersect(const r:RayRecord):HitInfo;override;
       procedure LoadObj(ObjPath:string;FN:string);override;
       procedure MakeBVHNode;
@@ -98,7 +97,6 @@ begin
    cen.x:=(bvh.root.little.x+bvh.root.large.x)/2;
    cen.y:=(bvh.root.little.y+bvh.root.large.y)/2;
    cen.z:=(bvh.root.little.z+bvh.root.large.z)/2;
-   radius:=(bvh.root.large-cen).len;
 end;
 
 procedure BVHListClass.LoadObj(ObjPath:string;FN: string);

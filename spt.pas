@@ -9,7 +9,7 @@ uses
    cwstring, // ← Linux/Unix環境でUTF-8(System/WideString)を正しく扱うために必須
    {$endif}
    SysUtils,Classes,Math,getopts,
-   uVect,uBMP,uShape,uRadiance,uScene,uObjShape,uTOMLtool;
+   uVect,uBMP,uShape,uRadiance,uScene,uObjShape,uTOMLcfg;
 
 const
    MaxThread=32;
@@ -155,11 +155,6 @@ begin
    if AspectFlag then begin
       h:=w*9 div 16;
    end;
-   writeln('samps=',samps);
-   writeln('size=',w,'x',h);
-   writeln('model=',modelnum);
-   writeln('threads=',threadnum);
-   writeln('output=',FN);
    BMP.new(w,h);
    sc.new(w,h,samps);
 
@@ -172,6 +167,7 @@ begin
           sc.cam:=SPTDoc.camNew;
           sc.scList.add(SPTDoc.GetShapeList);
           SPTDoc.AddBVHList(sc);
+          BMP.new(sc.cam.w,sc.cam.h);
        end;
       70: CornelBunnyScene(sc);
       60: SkyBunnyScene(sc);
@@ -190,6 +186,12 @@ begin
    else
       InitScene(sc);
    end;(*case*)
+
+   writeln('samps=',sc.cam.samps);
+   writeln('size=',sc.cam.w,'x',sc.cam.h);
+   writeln('model=',modelnum);
+   writeln('threads=',threadnum);
+   writeln('output=',FN);
 
    writeln ('load Data! The time is : ',TimeToStr(Time));
    StarTime:=Time; 

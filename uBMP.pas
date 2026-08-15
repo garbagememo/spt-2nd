@@ -78,10 +78,10 @@ begin
       Writer := TFPWriterPNG.Create;
       TFPWriterPNG(Writer).WordSized:=false;
    end
-   else if Ext = '.bmp' then
-      Writer := TFPWriterBMP.Create
-   else
-   begin
+   else if Ext = '.bmp' then begin
+      Writer := TFPWriterBMP.Create;
+   end
+   else begin
       WriteLn('未対応の拡張子のためファイル名をout.pngに ');
       FN:='out.png';
       Writer := TFPWriterPNG.Create;

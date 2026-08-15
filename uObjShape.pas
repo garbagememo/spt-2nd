@@ -28,7 +28,6 @@ type
 
    // Dir パラメータを追加（Dir が空文字の場合は現在のディレクトリから読み込み）
    procedure LoadObjFile(Dir, FN: string; Shapes: TList); 
-   procedure SetAttribShapeList(Shapes: TList; e_, c_: Vec3; refl_: RefType);
 
 var
    PolygonDumpFlag: boolean;
@@ -363,14 +362,6 @@ begin
    Writeln(Format('Loaded OBJ: %d vertices, %d normals.', [vCount, nCount]));
 end;
 
-procedure SetAttribShapeList(Shapes: TList; e_, c_: Vec3; refl_: RefType);
-var
-   i: integer;
-begin
-   for i := 0 to Shapes.count - 1 do begin
-      ShapeClass(Shapes[i]).SetAttrib(e_, c_, refl_);
-   end;
-end;
 
 begin
    PolygonDumpFlag := false;
