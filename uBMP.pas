@@ -34,9 +34,9 @@ implementation
 
 procedure BMPRecord.new(x,y:longint);
 begin
-   Setlength(BMPBody,x*y*3*2);
+   Setlength(BMPBody,x*y);
    BMPWidth:=x;BMPHeight:=y;
-   bmpBodySize:=longint(x*y)*3*2;
+   bmpBodySize:=length(BMPBody)*sizeof(rgbColor);
 end;
 
 procedure BMPRecord.SetPixel(x,y:integer;col:rgbColor);

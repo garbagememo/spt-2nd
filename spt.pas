@@ -23,7 +23,7 @@ type
    LineArray=array[0..255*255] of rgbColor;
 
    TMyThread = class(TThread)
-      wide,hight,samps:integer;//render option
+      wide,height,samps:integer;//render option
       y,yInc:integer;
       Line:LineArray;
       cam:CamRecord;
@@ -37,7 +37,7 @@ var
    x,sx,sy,s:integer;
    r,tColor:Vec3;
 begin
-   while y<hight do begin
+   while y<height do begin
       if y mod 10 =0 then writeln('y=',y);
       for x:= 0 to wide - 1 do begin
          tColor:=ZeroVec;
@@ -61,7 +61,7 @@ var
    j:integer;
    yAxis:integer;
 begin
-   yAxis:=hight-y-1;
+   yAxis:=height-y-1;
    for j:=0 to wide-1 do BMP.SetPixel(j,yAxis,line[j]);
    y:=y+yInc;
 end;
@@ -167,7 +167,7 @@ begin
           sc.cam:=SPTDoc.camNew;
           sc.scList.add(SPTDoc.GetShapeList);
           SPTDoc.AddBVHList(sc);
-          BMP.new(sc.cam.w,sc.cam.h);
+          BMP.new(sc.cam.w,sc.cam.h);//TOMLファイル優先のため
        end;
       70: CornelBunnyScene(sc);
       60: SkyBunnyScene(sc);
@@ -186,14 +186,14 @@ begin
    else
       InitScene(sc);
    end;(*case*)
-
+   writeln ('load Data! The time is : ',TimeToStr(Time));
    writeln('samps=',sc.cam.samps);
    writeln('size=',sc.cam.w,'x',sc.cam.h);
    writeln('model=',modelnum);
    writeln('threads=',threadnum);
    writeln('output=',FN);
+   writeln('Obj File Path=',ObjFilePath);
 
-   writeln ('load Data! The time is : ',TimeToStr(Time));
    StarTime:=Time; 
 
    for i:=0 to ThreadNum-1 do begin
@@ -202,7 +202,7 @@ begin
       //falseにしないとスレッドが休止時の後始末ができない。
       ThreadAry[i].y:=i;
       ThreadAry[i].wide:=sc.cam.w;
-      ThreadAry[i].hight:=sc.cam.h;
+      ThreadAry[i].height:=sc.cam.h;
       ThreadAry[i].cam:=sc.cam;
       ThreadAry[i].samps:=sc.cam.samps;
       ThreadAry[i].yInc:=ThreadNum;
