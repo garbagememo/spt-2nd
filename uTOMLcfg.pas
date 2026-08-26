@@ -51,7 +51,7 @@ begin
    Val := GetValueByPath(KeyName);
    if (Val <> nil) and (Val.ValueType = tvtArray) then begin
       PosArray := Val.AsArray;
-      result.new( PosArray[0].AsFloat,PosArray[1].AsFloat,PosArray[2].AsFloat);
+      result:=vec3.new( PosArray[0].AsFloat,PosArray[1].AsFloat,PosArray[2].AsFloat);
    end
    else
       result:=INFVec;
@@ -63,7 +63,7 @@ var
 begin
    PosArray := OT.GetArray(KeyName);
    if (PosArray <> nil) then 
-      result.new( PosArray[0].AsFloat,PosArray[1].AsFloat,PosArray[2].AsFloat);
+      result:=vec3.new( PosArray[0].AsFloat,PosArray[1].AsFloat,PosArray[2].AsFloat);
 end;      
 
 function SPTOMLDocument.GetShapeList:ShapeListClass;
@@ -101,10 +101,20 @@ begin
                end;
                TextureTable := ObjTable.GetTable('bmp');
                if TextureTable<>nil then begin
-                  sh.tx:=SphereBMPTextureClass.create(e,c,SphereClass(sh).p,
-                                                      ObjFilePath,
-                                                      TextureTable.GetString('filename'));
-                  end;
+                  writeln('Sphere Texture Bitmap=',TextureTable.GetString('filename'));                  
+                  sh.tx:=SphereBitmapTextureClass.create(e,c,SphereClass(sh).p,
+                                                         ObjFilePath,
+                                                         TextureTable.GetString('filename'));
+               end;
+               TextureTable := ObjTable.GetTable('scale');
+               if TextureTable<>nil then begin
+                  writeln('Scale Texture Bitmap=',TextureTable.GetString('filename'));
+                  
+                  sh.tx:=ScaleBitmapTextureClass.create(e,c,ZeroVec,
+                                                        TextureTable.GetFloat('magnification',1.0),
+                                                        ObjFilePath,
+                                                        TextureTable.GetString('filename'));
+               end;
             end;            
             ShapeList.add(sh );
          end
@@ -149,9 +159,9 @@ begin
       result:=bvh;
       TextureTable := ObjTable.GetTable('bmp');
       if TextureTable<>nil then begin
-         tx:=SphereBMPTextureClass.create(zeroVec,zeroVec,bvh.cen,
-                                          ObjFilePath,
-                                          TextureTable.GetString('filename'));
+         tx:=SphereBitmapTextureClass.create(zeroVec,zeroVec,bvh.cen,
+                                             ObjFilePath,
+                                             TextureTable.GetString('filename'));
          for j:=0 to bvh.shapes.count-1 do ShapeClass(bvh.shapes[j]).tx:=tx;            
       end;
    end;

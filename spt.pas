@@ -167,7 +167,7 @@ begin
           sc.cam:=SPTDoc.camNew;
           sc.scList.add(SPTDoc.GetShapeList);
           SPTDoc.AddBVHList(sc);
-          BMP.new(sc.cam.w,sc.cam.h);//TOMLファイル優先のため
+          BMP.new(sc.cam.w,sc.cam.h);
        end;
       70: CornelBunnyScene(sc);
       60: SkyBunnyScene(sc);
@@ -175,6 +175,7 @@ begin
       40: TeapotScene(sc);
       30: InitObjScene(sc);
       20: bvhRandomScene(sc);
+      12: DebianSpiralScene(sc);
       11: EvenlySpiralScene(sc);
       10: SpiralScene(sc);
       6:  IslandScene(sc);
@@ -192,7 +193,6 @@ begin
    writeln('model=',modelnum);
    writeln('threads=',threadnum);
    writeln('output=',FN);
-   writeln('Obj File Path=',ObjFilePath);
 
    StarTime:=Time; 
 

@@ -107,7 +107,6 @@ end;
 constructor BVHNodeClass.Create(var ary: IntegerArray; L, R: Integer; sph: TList);
 var
   i, mid, axis: integer;
-  nodeBox: AABBRecord;
   axisWidth: Vec3;
 begin
   Leaf := Nil_Leaf;

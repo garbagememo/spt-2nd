@@ -21,7 +21,7 @@ const
 type
    Vec3=record
       x,y,z:real;
-      function new(x_,y_,z_:real):Vec3;
+      class function new(x_,y_,z_:real):Vec3;static;inline;
       function Norm:Vec3;inline;
       function len:real;inline;
       function Dot(const V2 :Vec3):real;inline;//内積
@@ -43,7 +43,7 @@ type
    
    RayRecord=record
       o, d:Vec3;
-      function new(o_,d_:Vec3):RayRecord;
+      class function new(o_,d_:Vec3):RayRecord;static;
    end;
     
    CamRecord=record
@@ -83,10 +83,9 @@ begin
    if (v.x>INF) and (v.y>INF) and (v.z>INF) then result := true else result:=false;
 end;
 
-function Vec3.new(x_,y_,z_:real):Vec3;inline;
+class function Vec3.new(x_,y_,z_:real):Vec3;static;inline;
 begin
-   x:=x_;y:=y_;z:=z_;
-   result:=self;
+   result.x:=x_;result.y:=y_;result.z:=z_;
 end;
 
 function Vec3.Norm:Vec3;inline;
@@ -125,12 +124,11 @@ begin
     result.z:=-z;
 end;
 
-function RayRecord.new(o_,d_:Vec3):RayRecord;
+class function RayRecord.new(o_,d_:Vec3):RayRecord;
 begin
-   o:=o_;
-   d:=d_;
-   result:=self;
-end;
+   result.o:=o_;
+   result.d:=d_;
+ end;
 
 function VecAdd3(V1,V2,V3:Vec3):Vec3;
 begin
@@ -232,7 +230,7 @@ end;
 function CamRecord.new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;
 begin
   o:=o_;d:=d_.norm;w:=w_;h:=h_;samps:=samps_;
-  cx.new(w * 0.5135 / h, 0, 0);
+  cx:=Vec3.new(w * 0.5135 / h, 0, 0);
   cy:= (cx/ d).norm* 0.5135;
   PlaneDist:=140;
   result:=self;

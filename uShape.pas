@@ -51,13 +51,18 @@ type
       function GetColor(x:Vec3):Vec3;override;
    end;
 
-   SphereBMPTextureClass = class(TextureClass)
+   SphereBitmapTextureClass = class(TextureClass)
       p:Vec3;
       BMP:BMPRecord;
       constructor create(e_,c_,p_:Vec3;FNPath,FN:string);virtual;
       function GetColor(x:Vec3):Vec3;override;
    end;
-   
+   ScaleBitmapTextureClass = class(SphereBitmapTextureClass)
+      scale:real;//bitmapを変倍
+      xwh,zwh,xwl,zwl:real;
+      constructor create(e_,c_,p_:Vec3;scale_:real;FNPath,FN:string);virtual;
+      function GetColor(x:Vec3):Vec3;override;
+   end;   
    ShapeClass = class;
    
    HitInfo = record
@@ -109,13 +114,13 @@ function AABBRecord.MargeBoundBox(box1:AABBRecord):AABBRecord;
 var
    small,big:Vec3;
 begin
-   small.new(min(little.x, box1.little.x),
-             min(little.y, box1.little.y),
-             min(little.z, box1.little.z));
+   small:=vec3.new(min(little.x, box1.little.x),
+                      min(little.y, box1.little.y),
+                      min(little.z, box1.little.z));
 
-   big.new(max(large.x, box1.large.x),
-           max(large.y, box1.large.y),
-           max(large.z, box1.large.z) );
+   big:=vec3.new(max(large.x, box1.large.x),
+                     max(large.y, box1.large.y),
+                     max(large.z, box1.large.z) );
 
    result.new(small,big);
 end;
@@ -177,14 +182,12 @@ end;
 
 
 constructor SphereClass.Create(rad_:real;p_,e_,c_:Vec3;refl_:RefType);
-var
-   b:Vec3;
 begin
    p:=p_;
    inherited create(e_,c_,refl_);
    rad:=rad_;
-   BoundBox.new(p - b.new(rad, rad, rad),
-                p + b.new(rad, rad, rad));
+   BoundBox.new(p - vec3.new(rad, rad, rad),
+                p + vec3.new(rad, rad, rad));
 end;
 function SphereClass.intersect(const r:RayRecord):InterInfo;
 var
@@ -233,18 +236,17 @@ function DiffuseClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
 var
    r1,r2,r2s:real;
    u,v,w,d:Vec3;
-   ray2:RayRecord;
 begin
    r1:=2*PI*random;r2:=random;r2s:=sqrt(r2);
    w:=nl;
    if abs(w.x)>0.1 then
-      u:=(u.new(0,1,0)/w).norm 
+      u:=(vec3.new(0,1,0)/w).norm 
    else begin
-      u:=(u.new(1,0,0)/w ).norm;
+      u:=(vec3.new(1,0,0)/w ).norm;
    end;
    v:=w/u;
    d := (u*cos(r1)*r2s + v*sin(r1)*r2s + w*sqrt(1-r2)).norm;
-   result.r:=ray2.new(x,d);
+   result.r:=RayRecord.new(x,d);
    result.cpc:=1.0;
 end;
 
@@ -254,10 +256,8 @@ begin
 end;
 
 function MirrorClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
-var
-   ray2:RayRecord;
 begin
-   result.r:=ray2.new(x,r.d-nl*2*(nl*r.d) );//オリジナルはnlではなくnなので不安があるが
+   result.r:=RayRecord.new(x,r.d-nl*2*(nl*r.d) );//オリジナルはnlではなくnなので不安があるが
    result.cpc:=1.0;
 end;
 
@@ -268,13 +268,13 @@ end;
 
 function RefractClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
 var
-   ray2,RefRay:RayRecord;
+   RefRay:RayRecord;
    into:boolean;
    nc,nt,nnt,ddn,cos2t,q,a,b,c,R0,Re,RP,Tr,TP:real;
    tDir:Vec3;
    p:real;
 begin
-   RefRay.new(x,r.d-n*2*(n*r.d) );
+   RefRay:=RayRecord.new(x,r.d-n*2*(n*r.d) );
    into:= (n*nl>0);
    nc:=1;nt:=1.5;
    if into then nnt:=nc/nt else nnt:=nt/nc; ddn:=r.d*nl; 
@@ -295,7 +295,7 @@ begin
       result.cpc:=RP;
    end
    else begin //屈折
-      result.r:=ray2.new(x,tdir);
+      result.r:=RayRecord.new(x,tdir);
       result.cpc:=TP;
    end;
 end;
@@ -347,7 +347,7 @@ begin
    end ;
 end;
 
-constructor SphereBMPTextureClass.create(e_,c_,p_:Vec3;FNPath,FN:string);
+constructor SphereBitmapTextureClass.create(e_,c_,p_:Vec3;FNPath,FN:string);
 var
    FPFN:string;
 begin
@@ -363,12 +363,36 @@ begin
    inherited create(e_,c_);
 end;   
 
-function SphereBMPTextureClass.GetColor(x:Vec3):Vec3;
+function SphereBitmapTextureClass.GetColor(x:Vec3):Vec3;
 var
    uv:Vec2;
 begin
    uv:=uv.DirToUV(x-self.p);
    result:=RGBtoColor(BMP.GetPixel(trunc(BMP.bmpWidth*uv.u),trunc(BMP.bmpHeight*uv.v)));
+end;
+
+constructor ScaleBitmapTextureClass.create(e_,c_,p_:Vec3;scale_:real;FNPath,FN:string);
+begin
+   inherited create(e_,c_,p_,FNPath,FN);
+   scale:=scale_;
+   xwh:=BMP.bmpWidth / (scale*2);
+   zwh:=BMP.bmpHeight /(scale*2);
+   xwl:=-BMP.bmpWidth / (scale*2);
+   zwl:=-BMP.bmpHeight /(scale*2);
+end;
+
+function ScaleBitmapTextureClass.GetColor(x:Vec3):Vec3;
+var
+   xz:Vec3;
+   x1,z1:real;
+begin
+   xz:=x-p;
+   x1:=xz.x;
+   z1:=xz.z;
+   if (x1>xwh) or (z1>zwh) or(x1<xwl) or (z1<zwl) then
+      result:=c
+   else
+      result:=RGBtoColor(BMP.GetPixel(trunc((x1+xwh)*scale),trunc((zwh-z1)*scale)) );
 end;
 
 begin

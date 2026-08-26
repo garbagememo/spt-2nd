@@ -49,13 +49,9 @@ type
    TMaterialArray = array of TMaterialRecord;   
 
 constructor PolygonClass.Create(const v0_, v1_, v2_, n_: Vec3; tx_: TextureClass; m_: MaterialClass);
-var
-   BoundMax, BoundMin: Vec3;
 begin
-  
    tx := tx_;
    m := m_;
-
    v0 := v0_; v1 := v1_; v2 := v2_; 
    
    // 指定された法線がゼロベクトルの場合は自動計算するフォールバック処理
@@ -64,10 +60,10 @@ begin
    else
       n := n_.Norm;
 
-   BoundBox.new(BoundMin.new(math.min(v0.x, math.min(v1.x, v2.x)) - eps,
+   BoundBox.new(Vec3.New(math.min(v0.x, math.min(v1.x, v2.x)) - eps,
                              math.min(v0.y, math.min(v1.y, v2.y)) - eps,
                              math.min(v0.z, math.min(v1.z, v2.z)) - eps),
-                BoundMax.new(math.max(v0.x, math.max(v1.x, v2.x)) + eps,
+                vec3.new(math.max(v0.x, math.max(v1.x, v2.x)) + eps,
                              math.max(v0.y, math.max(v1.y, v2.y)) + eps,
                              math.max(v0.z, math.max(v1.z, v2.z)) + eps));
 end;
@@ -135,7 +131,7 @@ begin
    rest := Trim(Copy(rest, Pos(' ', rest) + 1, MaxInt));
    y := StrToFloat(Copy(rest, 1, Pos(' ', rest + ' ') - 1));
    z := StrToFloat(Trim(Copy(rest, Pos(' ', rest) + 1, MaxInt)));
-   Result.New(x, y, z);
+   Result:=vec3.new(x, y, z);
 end;
 
 // fトークンから要素（v/vt/vn）を安全に分解抽出
@@ -210,7 +206,7 @@ begin
       else if (fNIdx[i] > 0) and (fNIdx[i] <= High(normals) + 1) then
          polyN := normals[fNIdx[i] - 1]
       else
-         polyN.New(0, 0, 0);
+         polyN:=vec3.new(0, 0, 0);
 
       if (p1 > 0) and (p1 <= High(vertices) + 1) and
          (p2 > 0) and (p2 <= High(vertices) + 1) and
@@ -257,8 +253,8 @@ begin
          Inc(mCount);
          SetLength(materials, mCount);
          materials[mCount - 1].Name := Trim(Copy(line, Pos(' ', line) + 1, MaxInt));
-         materials[mCount - 1].Color.New(0.8, 0.8, 0.8);
-         materials[mCount - 1].Emit.New(0.0, 0.0, 0.0);
+         materials[mCount - 1].Color:=vec3.new(0.8, 0.8, 0.8);
+         materials[mCount - 1].Emit:=vec3.new(0.0, 0.0, 0.0);
          materials[mCount - 1].Refl := DIFF;
          materials[mCount - 1].Tx := nil;
          materials[mCount - 1].Mat := nil;
@@ -316,8 +312,8 @@ begin
    vCount := 0; nCount := 0; mCount := 0;
    
    // デフォルトマテリアルの生成
-   defColor.New(0.8, 0.8, 0.8);
-   defEmit.New(0.0, 0.0, 0.0);
+   defColor:=vec3.new(0.8, 0.8, 0.8);
+   defEmit:=ZeroVec;
    defaultTx := TextureClass.Create(defEmit, defColor);
    defaultMat := DiffuseClass.Create;
    curTx := defaultTx;
