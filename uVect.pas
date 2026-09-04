@@ -51,7 +51,7 @@ type
       PlaneDist:real;
       w,h,samps:integer;
       cx,cy:Vec3;
-      function new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;
+      class function new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;static;
       function GetRay(x,y,sx,sy:integer):RayRecord;
       procedure CamWrite;
    end;
@@ -227,13 +227,16 @@ begin
    result.b:=c.b*rev_MAX_WORD;
 end;
 
-function CamRecord.new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;
+class function CamRecord.new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;
 begin
-  o:=o_;d:=d_.norm;w:=w_;h:=h_;samps:=samps_;
-  cx:=Vec3.new(w * 0.5135 / h, 0, 0);
-  cy:= (cx/ d).norm* 0.5135;
-  PlaneDist:=140;
-  result:=self;
+   result.o:=o_;
+   result.d:=d_.norm;
+   result.w:=w_;
+   result.h:=h_;
+   result.samps:=samps_;
+   result.cx:=Vec3.new(result.w * 0.5135 / result.h, 0, 0);
+   result.cy:= (result.cx/ result.d).norm* 0.5135;
+   result.PlaneDist:=140;
 end;
 
 function CamRecord.GetRay(x,y,sx,sy:integer):RayRecord;

@@ -108,7 +108,7 @@ end;
 procedure SceneRecord.new(w,h,samps:integer);
 begin
    scList:=TList.create;
-   cam.new(vec3.new(50, 52, 295.6),vec3.new(0, -0.042612, -1).norm,w,h,samps );
+   cam:=CamRecord.new(vec3.new(50, 52, 295.6),vec3.new(0, -0.042612, -1).norm,w,h,samps );
 end;
 
 function SceneRecord.Radiance(const r:RayRecord;depth:integer):Vec3;

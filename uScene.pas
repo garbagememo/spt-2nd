@@ -133,7 +133,7 @@ begin
    end;
    sc.scList.add(sph);
 
-   sc.cam.new(vec3.new(55,40,295.6),vec3.new(0,-0.12,-1).norm,
+   sc.cam:=CamRecord.new(vec3.new(55,40,295.6),vec3.new(0,-0.12,-1).norm,
               sc.cam.w,sc.cam.h,sc.cam.samps);
    sc.cam.PlaneDist:=70;
 end;
@@ -184,7 +184,7 @@ begin
    sc.scList.add(sph);
    sc.scList.add(bvh);
 
-   sc.cam.new(vec3.new(55,40,295.6),vec3.new(0,-0.12,-1).norm,
+   sc.cam:=CamRecord.new(vec3.new(55,40,295.6),vec3.new(0,-0.12,-1).norm,
               sc.cam.w,sc.cam.h,sc.cam.samps);
    sc.cam.PlaneDist:=70;
 end;
@@ -343,7 +343,7 @@ begin
    end;
    sc.scList.add(sph);
     
-   sc.cam.new(vec3.new(-10,150,220),
+   sc.cam:=CamRecord.new(vec3.new(-10,150,220),
               vec3.new(0,-150,-200).norm,
               sc.cam.w,sc.cam.h,sc.cam.samps);
    sc.cam.PlaneDist:=70;
@@ -411,7 +411,7 @@ begin
    bvh.MakeBVHNode;
    sc.scList.add(bvh);
 
-   sc.cam.new(vec3.new(-10,150,220),
+   sc.cam:=CamRecord.new(vec3.new(-10,150,220),
               vec3.new(0,-150,-200).norm,
               sc.cam.w,sc.cam.h,sc.cam.samps);
    sc.cam.PlaneDist:=70;
@@ -481,7 +481,7 @@ begin
    bvh.MakeBVHNode;
    sc.scList.add(bvh);
 
-   sc.cam.new(vec3.new(-10,150,220),
+   sc.cam:=CamRecord.new(vec3.new(-10,150,220),
               vec3.new(0,-150,-200).norm,
               sc.cam.w,sc.cam.h,sc.cam.samps);
    sc.cam.PlaneDist:=70;
@@ -506,7 +506,7 @@ begin
    bvh.loadObj(ObjFilePath,'teapot.obj');
    sc.scList.add(bvh);
    
-   sc.cam.new(vec3.new(10,300,250),
+   sc.cam:=CamRecord.new(vec3.new(10,300,250),
               vec3.new(0,-300,-250).norm,
               sc.cam.w,sc.cam.h,sc.cam.samps);
    sc.cam.PlaneDist:=70;
@@ -533,7 +533,7 @@ var
    bvh.loadObj(ObjFilePath,'bunny100.obj');
    sc.scList.add(bvh);
 
-   sc.cam.new(vec3.new(-30,450,300),
+   sc.cam:=CamRecord.new(vec3.new(-30,450,300),
               vec3.new(0,-300,-250).norm,
               sc.cam.w,sc.cam.h,sc.cam.samps);
    sc.cam.PlaneDist:=70;
