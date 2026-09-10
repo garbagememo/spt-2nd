@@ -19,6 +19,23 @@ const
    INF=1e20;
 
 type
+
+   RandomRecord = record
+   private
+      const
+         N = 624;
+         MATRIX_A = $9908B0DF;
+         UPPER_MASK = $80000000;
+         LOWER_MASK = $7FFFFFFF;
+      var
+         FState: array[0..N - 1] of Cardinal;
+         FIndex: Integer;
+         procedure Twist;
+   public
+      constructor Create(seed_: Cardinal);
+      function Random: real;inline;
+   end;
+
    Vec3=record
       x,y,z:real;
       class function new(x_,y_,z_:real):Vec3;static;inline;
@@ -52,7 +69,7 @@ type
       w,h,samps:integer;
       cx,cy:Vec3;
       class function new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;static;
-      function GetRay(x,y,sx,sy:integer):RayRecord;
+      function GetRay(x,y,sx,sy:integer;var rnd:RandomRecord):RayRecord;
       procedure CamWrite;
    end;
 
@@ -239,21 +256,15 @@ begin
    result.PlaneDist:=140;
 end;
 
-function CamRecord.GetRay(x,y,sx,sy:integer):RayRecord;
+function CamRecord.GetRay(x,y,sx,sy:integer;var rnd:RandomRecord):RayRecord;
 var
    r1,r2,dx,dy:real;
    dirct:Vec3;
 begin
-   r1 := 2 * random;
-   if (r1 < 1) then
-      dx := sqrt(r1) - 1
-   else
-      dx := 1 - sqrt(2 - r1);
-   r2 := 2 * random;
-   if (r2 < 1) then
-      dy := sqrt(r2) - 1
-   else
-      dy := 1 - sqrt(2 - r2);
+   r1 := 2 * rnd.random;
+   if (r1 < 1) then dx := sqrt(r1) - 1 else dx := 1 - sqrt(2 - r1);
+   r2 := 2 * rnd.random;
+   if (r2 < 1) then dy := sqrt(r2) - 1 else dy := 1 - sqrt(2 - r2);
    dirct:= cy* (((sy + 0.5 + dy) / 2 + (h - y - 1)) / h - 0.5)
       +cx* (((sx + 0.5 + dx) / 2 + x) / w - 0.5)
       +d;
@@ -270,14 +281,6 @@ begin
    write(' d=');VecWriteln(d);
    write(' cx=');VecWriteln(cx);
    write(' cy=');VecWriteln(cy);
-   writeln('===0,0==');
-   r:=GetRay(0,0,0,0);
-   write(' r.o=');VecWriteln(r.o);
-   write(' r.d=');VecWriteln(r.d);
-   writeln('===320,240==');
-   r:=GetRay(320,240,0,0);
-   write(' r.o=');VecWriteln(r.o);
-   write(' r.d=');VecWriteln(r.d);
 end;
 
 
@@ -294,7 +297,50 @@ begin
    // 下が V=0 の場合
    Result.V := 0.5 + (ArcSin(ClampedZ) / Pi);
 end;
-  
+
+constructor RandomRecord.Create(seed_: Cardinal);
+var
+   i: Integer;
+begin
+   FState[0] := seed_ and $FFFFFFFF;
+   for i := 1 to N - 1 do begin
+      FState[i] := 1812433253 * (FState[i - 1] xor (FState[i - 1] shr 30)) + i;
+      FState[i] := FState[i] and $FFFFFFFF;
+   end;
+   FIndex := N;
+end;
+
+procedure RandomRecord.Twist;
+var
+   i: Integer;
+   y: Cardinal;
+begin
+   for i := 0 to N - 1 do  begin
+      y := (FState[i] and UPPER_MASK) or (FState[(i + 1) mod N] and LOWER_MASK);
+      FState[i] := FState[(i + 156) mod N] xor (y shr 1);
+      if (y and 1) <> 0 then FState[i] := FState[i] xor MATRIX_A;
+   end;
+   FIndex := 0;
+end;
+
+function RandomRecord.Random: real;inline;
+var
+   y: Cardinal;
+begin
+   if FIndex >= N then Twist;
+
+   y := FState[FIndex];
+   Inc(FIndex);
+
+   // 攪拌（Tempering）処理
+   y := y xor (y shr 11);   y := y xor ((y shl 7) and $9D2C5680);
+   y := y xor ((y shl 15) and $EFC60000);   y := y xor (y shr 18);
+
+   // [0, 1) の範囲の浮動小数点数に変換
+   Result := y / 4294967296.0;
+end;
+
+
 begin
 end.
    

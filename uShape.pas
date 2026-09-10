@@ -19,22 +19,22 @@ type
    end;
    
    MaterialClass = class
-      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;virtual;abstract;
+      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;virtual;abstract;
       function IDStr:string;virtual;
    end;
 
    DiffuseClass = class(MaterialClass)
-      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
+      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;override;
       function IDStr:string;override;
    end;
 
    MirrorClass = class(MaterialClass)
-      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
+      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;override;
       function IDStr:string;override;
    end;
 
    RefractClass = class(MaterialClass)
-      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
+      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;override;
       function IDStr:string;override;
    end;
 
@@ -232,12 +232,12 @@ begin
    result:='';
 end;
 
-function DiffuseClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
+function DiffuseClass.GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;
 var
    r1,r2,r2s:real;
    u,v,w,d:Vec3;
 begin
-   r1:=2*PI*random;r2:=random;r2s:=sqrt(r2);
+   r1:=2*PI*rnd.random;r2:=rnd.random;r2s:=sqrt(r2);
    w:=nl;
    if abs(w.x)>0.1 then
       u:=(vec3.new(0,1,0)/w).norm 
@@ -255,7 +255,7 @@ begin
    result:='DIFF';
 end;
 
-function MirrorClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
+function MirrorClass.GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;
 begin
    result.r:=RayRecord.new(x,r.d-nl*2*(nl*r.d) );//オリジナルはnlではなくnなので不安があるが
    result.cpc:=1.0;
@@ -266,7 +266,7 @@ begin
    result:='SPEC';
 end;
 
-function RefractClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
+function RefractClass.GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;
 var
    RefRay:RayRecord;
    into:boolean;
@@ -290,7 +290,7 @@ begin
    a:=nt-nc; b:=nt+nc; R0:=a*a/(b*b); c := 1-Q;
    Re:=R0+(1-R0)*c*c*c*c*c;Tr:=1-Re;P:=0.25+0.5*Re;RP:=Re/P;TP:=Tr/(1-P);
 
-   if random<p then begin// 反射
+   if rnd.random<p then begin// 反射
       result.r:=RefRay;
       result.cpc:=RP;
    end

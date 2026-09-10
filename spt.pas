@@ -27,6 +27,7 @@ type
       y,yInc:integer;
       Line:LineArray;
       cam:CamRecord;
+      rnd:RandomRecord;
       procedure Execute; override;
       procedure AddAxis;
    end;
@@ -37,6 +38,7 @@ var
    x,sx,sy,s:integer;
    r,tColor:Vec3;
 begin
+//   RandSeed := GetTickCount64 xor PtrUInt(ThreadID);
    while y<height do begin
       if y mod 10 =0 then writeln('y=',y);
       for x:= 0 to wide - 1 do begin
@@ -44,8 +46,8 @@ begin
          for sy := 0 to 1 do begin
             for sx := 0 to 1 do begin
                r:=ZeroVec;
-               for s := 0 to sc.cam.samps - 1 do begin
-                  r:= r+sc.Radiance(sc.cam.GetRay(x,y,sx,sy), 0)/ sc.cam.samps;
+               for s := 0 to cam.samps - 1 do begin
+                  r:= r+sc.Radiance(cam.GetRay(x,y,sx,sy,rnd), 0, rnd)/ cam.samps;
                end;(*samps*)
                tColor:=tColor+ ClampVector(r)* 0.25;
             end;(*sx*)
@@ -206,16 +208,18 @@ begin
       ThreadAry[i].cam:=sc.cam;
       ThreadAry[i].samps:=sc.cam.samps;
       ThreadAry[i].yInc:=ThreadNum;
+      ThreadAry[i].rnd.create( Cardinal((i + 1) * 123456789 + GetTickCount64) );
    end;
    writeln('Setup!');
    
    for i:=0 to ThreadNum-1 do begin
       ThreadAry[i].Start;
-   end;
+     end;
    //このルーチンが別途で無いとマルチスレッドにならない
    for i:=0 to ThreadNum-1 do begin
       ThreadAry[i].WaitFor;
    end;
+
    writeln('The time is : ',TimeToStr(Time));
    writeln('Calcurate time is=',TimeToStr(Time-StarTime));
    BMP.WriteFile(FN);
