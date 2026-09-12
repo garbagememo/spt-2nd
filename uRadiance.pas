@@ -28,7 +28,7 @@ type
       scList:TList;//List of SceneListClass
       cam:CamRecord;
       procedure new(w,h,samps:integer);
-      function Radiance(const r:RayRecord;depth:integer;var Rnd:RandomRecord):Vec3;
+      function Radiance(const r:RayRecord;depth:integer):Vec3;
    end;
 
 var
@@ -111,7 +111,7 @@ begin
    cam:=CamRecord.new(vec3.new(50, 52, 295.6),vec3.new(0, -0.042612, -1).norm,w,h,samps );
 end;
 
-function SceneRecord.Radiance(const r:RayRecord;depth:integer;var Rnd:RandomRecord):Vec3;
+function SceneRecord.Radiance(const r:RayRecord;depth:integer):Vec3;
 var
    f,x,n,nl:Vec3;
    p:real;
@@ -146,8 +146,8 @@ begin
       else
          Exit(hit.obj.tx.GetEmit(x));
    end;
-   tInfo := hit.obj.m.GetRay(r,x,n,nl,rnd);
-   result:=hit.obj.tx.GetEmit(x)+f.Mult(Radiance(tInfo.r,depth,rnd))*tInfo.cpc;
+   tInfo := hit.obj.m.GetRay(r,x,n,nl);
+   result:=hit.obj.tx.GetEmit(x)+f.Mult(Radiance(tInfo.r,depth))*tInfo.cpc;
 end;
 begin
 end.

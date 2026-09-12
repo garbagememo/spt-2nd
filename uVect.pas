@@ -8,9 +8,10 @@ interface
 
 uses
    {$ifdef unix}
+   cthreads,cmem,
    cwstring, // ← Linux/Unix環境でUTF-8(System/WideString)を正しく扱うために必須
    {$endif}
-   sysutils,uBMP,math;
+   sysutils,uBMP,fpImage,math;
 
 const
    MAX_WORD = High(WORD);
@@ -19,7 +20,6 @@ const
    INF=1e20;
 
 type
-
    RandomRecord = record
    private
       const
@@ -30,7 +30,7 @@ type
       var
          FState: array[0..N - 1] of Cardinal;
          FIndex: Integer;
-         procedure Twist;
+         procedure Twist;inline;
    public
       constructor Create(seed_: Cardinal);
       function Random: real;inline;
@@ -69,7 +69,7 @@ type
       w,h,samps:integer;
       cx,cy:Vec3;
       class function new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;static;
-      function GetRay(x,y,sx,sy:integer;var rnd:RandomRecord):RayRecord;
+      function GetRay(x,y,sx,sy:integer):RayRecord;
       procedure CamWrite;
    end;
 
@@ -79,8 +79,8 @@ type
    end;
       
    function ClampVector(v:Vec3):Vec3;
-   function ColToRGB(v:Vec3):rgbColor;
-   function RGBtoColor(c:rgbColor):Vec3;inline;
+   function ColToRGB(v:Vec3):TFPColor;
+   function RGBtoColor(c:TFPColor):Vec3;inline;
 const
    BackGroundColor:Vec3 = (x:0;y:0;z:0);
    ZeroVec:Vec3 = (x:0;y:0;z:0);
@@ -92,6 +92,9 @@ function VecAdd3(V1,V2,V3:Vec3):Vec3;
 procedure VecWriteln(V:Vec3);
 procedure WriteVec(v:Vec3);
 function isINF(v:Vec3):boolean;
+
+threadvar
+   rnd:RandomRecord;
 
 implementation
 
@@ -230,18 +233,18 @@ begin
     result:=trunc(power(x,1/2.2)* MAX_WORD +0.5);
 end;
 
-function ColToRGB(v:Vec3):rgbColor;
+function ColToRGB(v:Vec3):TFPColor;
 begin
-    result.r:=ColToWord(v.r);
-    result.g:=ColToWord(v.g);
-    result.b:=ColToWord(v.b);
+    result.red:=ColToWord(v.r);
+    result.green:=ColToWord(v.g);
+    result.blue:=ColToWord(v.b);
 end;
 
-function RGBtoColor(c:rgbColor):Vec3;inline;
+function RGBtoColor(c:TFPColor):Vec3;inline;
 begin
-   result.r:=c.r*rev_MAX_WORD;
-   result.g:=c.g*rev_MAX_WORD;
-   result.b:=c.b*rev_MAX_WORD;
+   result.r:=c.red*rev_MAX_WORD;
+   result.g:=c.green*rev_MAX_WORD;
+   result.b:=c.blue*rev_MAX_WORD;
 end;
 
 class function CamRecord.new(o_,d_:Vec3;w_,h_,samps_:integer):CamRecord;
@@ -256,7 +259,7 @@ begin
    result.PlaneDist:=140;
 end;
 
-function CamRecord.GetRay(x,y,sx,sy:integer;var rnd:RandomRecord):RayRecord;
+function CamRecord.GetRay(x,y,sx,sy:integer):RayRecord;
 var
    r1,r2,dx,dy:real;
    dirct:Vec3;
@@ -281,6 +284,14 @@ begin
    write(' d=');VecWriteln(d);
    write(' cx=');VecWriteln(cx);
    write(' cy=');VecWriteln(cy);
+   writeln('===0,0==');
+   r:=GetRay(0,0,0,0);
+   write(' r.o=');VecWriteln(r.o);
+   write(' r.d=');VecWriteln(r.d);
+   writeln('===320,240==');
+   r:=GetRay(320,240,0,0);
+   write(' r.o=');VecWriteln(r.o);
+   write(' r.d=');VecWriteln(r.d);   
 end;
 
 
@@ -294,8 +305,8 @@ begin
    // ArcSin に渡す値のクランプ (-1.0 ～ 1.0) で NaN を防止
    ClampedZ := EnsureRange(d.y, -1.0, 1.0);
    
-   // 下が V=0 の場合
-   Result.V := 0.5 + (ArcSin(ClampedZ) / Pi);
+   // 上が V=0 の場合
+   Result.V := 0.5 - (ArcSin(ClampedZ) / Pi);
 end;
 
 constructor RandomRecord.Create(seed_: Cardinal);

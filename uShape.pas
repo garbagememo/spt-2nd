@@ -2,9 +2,11 @@
 {$MODE objfpc}{$H+}
 {$INLINE ON}
 {$modeswitch advancedrecords}
+{$codepage utf8} // ← これを追加！
 
 interface
-uses SysUtils,Classes,uVect,uBMP,Math;
+uses
+   SysUtils,Classes,uVect,uBMP,Math;
 
 type
    RefType=(DIFF,SPEC,REFR);// material types, used in radiance()
@@ -19,22 +21,22 @@ type
    end;
    
    MaterialClass = class
-      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;virtual;abstract;
+      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;virtual;abstract;
       function IDStr:string;virtual;
    end;
 
    DiffuseClass = class(MaterialClass)
-      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;override;
+      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
       function IDStr:string;override;
    end;
 
    MirrorClass = class(MaterialClass)
-      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;override;
+      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
       function IDStr:string;override;
    end;
 
    RefractClass = class(MaterialClass)
-      function GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;override;
+      function GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;override;
       function IDStr:string;override;
    end;
 
@@ -232,7 +234,7 @@ begin
    result:='';
 end;
 
-function DiffuseClass.GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;
+function DiffuseClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
 var
    r1,r2,r2s:real;
    u,v,w,d:Vec3;
@@ -255,7 +257,7 @@ begin
    result:='DIFF';
 end;
 
-function MirrorClass.GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;
+function MirrorClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
 begin
    result.r:=RayRecord.new(x,r.d-nl*2*(nl*r.d) );//オリジナルはnlではなくnなので不安があるが
    result.cpc:=1.0;
@@ -266,7 +268,7 @@ begin
    result:='SPEC';
 end;
 
-function RefractClass.GetRay(r:RayRecord;x,n,nl:Vec3;var rnd:RandomRecord):TraceInfo;
+function RefractClass.GetRay(r:RayRecord;x,n,nl:Vec3):TraceInfo;
 var
    RefRay:RayRecord;
    into:boolean;
@@ -368,17 +370,17 @@ var
    uv:Vec2;
 begin
    uv:=uv.DirToUV(x-self.p);
-   result:=RGBtoColor(BMP.GetPixel(trunc(BMP.bmpWidth*uv.u),trunc(BMP.bmpHeight*uv.v)));
+   result:=RGBtoColor(BMP.GetPixel(trunc(BMP.image.Width*uv.u),trunc(BMP.image.Height*uv.v)));
 end;
 
 constructor ScaleBitmapTextureClass.create(e_,c_,p_:Vec3;scale_:real;FNPath,FN:string);
 begin
    inherited create(e_,c_,p_,FNPath,FN);
    scale:=scale_;
-   xwh:=BMP.bmpWidth / (scale*2);
-   zwh:=BMP.bmpHeight /(scale*2);
-   xwl:=-BMP.bmpWidth / (scale*2);
-   zwl:=-BMP.bmpHeight /(scale*2);
+   xwh:=BMP.image.Width / (scale*2);
+   zwh:=BMP.image.Height /(scale*2);
+   xwl:=-BMP.image.Width / (scale*2);
+   zwl:=-BMP.image.Height /(scale*2);
 end;
 
 function ScaleBitmapTextureClass.GetColor(x:Vec3):Vec3;
@@ -392,7 +394,7 @@ begin
    if (x1>xwh) or (z1>zwh) or(x1<xwl) or (z1<zwl) then
       result:=c
    else
-      result:=RGBtoColor(BMP.GetPixel(trunc((x1+xwh)*scale),trunc((zwh-z1)*scale)) );
+      result:=RGBtoColor(BMP.GetPixel(trunc((x1+xwh)*scale),trunc((zwh+z1)*scale)) );
 end;
 
 begin

@@ -8,7 +8,7 @@ uses
    cthreads,cmem,
    cwstring, // ← Linux/Unix環境でUTF-8(System/WideString)を正しく扱うために必須
    {$endif}
-   SysUtils,Classes,Math,getopts,
+   SysUtils,Classes,Math,getopts,fpImage,
    uVect,uBMP,uShape,uRadiance,uScene,uObjShape,uTOMLcfg;
 
 const
@@ -20,14 +20,13 @@ var
 type
 
    //スタックサイズが不定を嫌ってdynamic arrayは使わない
-   LineArray=array[0..255*255] of rgbColor;
+   LineArray=array[0..255*255] of TFPColor;
 
    TMyThread = class(TThread)
-      wide,height,samps:integer;//render option
       y,yInc:integer;
       Line:LineArray;
       cam:CamRecord;
-      rnd:RandomRecord;
+      constructor create(StartBool:boolean;cam_:CamRecord;y_,yInc_:integer);
       procedure Execute; override;
       procedure AddAxis;
    end;
@@ -38,16 +37,17 @@ var
    x,sx,sy,s:integer;
    r,tColor:Vec3;
 begin
-//   RandSeed := GetTickCount64 xor PtrUInt(ThreadID);
-   while y<height do begin
+   rnd.create( Cardinal((ThreadID + 1) * 123456789 + GetTickCount64) );
+
+   while y<cam.h do begin
       if y mod 10 =0 then writeln('y=',y);
-      for x:= 0 to wide - 1 do begin
+      for x:= 0 to cam.w - 1 do begin
          tColor:=ZeroVec;
          for sy := 0 to 1 do begin
             for sx := 0 to 1 do begin
                r:=ZeroVec;
                for s := 0 to cam.samps - 1 do begin
-                  r:= r+sc.Radiance(cam.GetRay(x,y,sx,sy,rnd), 0, rnd)/ cam.samps;
+                  r:= r+sc.Radiance(cam.GetRay(x,y,sx,sy), 0)/ cam.samps;
                end;(*samps*)
                tColor:=tColor+ ClampVector(r)* 0.25;
             end;(*sx*)
@@ -61,13 +61,20 @@ end;
 procedure TMyThread.AddAxis;
 var
    j:integer;
-   yAxis:integer;
 begin
-   yAxis:=height-y-1;
-   for j:=0 to wide-1 do BMP.SetPixel(j,yAxis,line[j]);
+   for j:=0 to cam.w-1 do BMP.SetPixel(j,y,line[j]);
    y:=y+yInc;
 end;
-  
+
+constructor TMyThread.create(StartBool:boolean;cam_:CamRecord;y_,yInc_:integer);
+begin
+   cam:=cam_;
+   y:=y_;yInc:=yInc_;
+   FreeOnTerminate:=false;
+   //falseにしないとスレッドが休止時の後始末ができない。
+   
+   inherited create(StartBool);
+end;
   
 var
    i: integer;
@@ -199,16 +206,8 @@ begin
    StarTime:=Time; 
 
    for i:=0 to ThreadNum-1 do begin
-      ThreadAry[i]:=TMyThread.Create(true);
-      ThreadAry[i].FreeOnTerminate:=false;
-      //falseにしないとスレッドが休止時の後始末ができない。
-      ThreadAry[i].y:=i;
-      ThreadAry[i].wide:=sc.cam.w;
-      ThreadAry[i].height:=sc.cam.h;
-      ThreadAry[i].cam:=sc.cam;
-      ThreadAry[i].samps:=sc.cam.samps;
-      ThreadAry[i].yInc:=ThreadNum;
-      ThreadAry[i].rnd.create( Cardinal((i + 1) * 123456789 + GetTickCount64) );
+      ThreadAry[i]:=TMyThread.Create(false,sc.cam,i,ThreadNum);
+      //falseの場合、即時スレッドが起動するのでこの後の初期化は出来ない
    end;
    writeln('Setup!');
    

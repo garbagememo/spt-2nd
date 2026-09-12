@@ -39,7 +39,7 @@ begin
    sph.add( SphereClass.Create(1e5, vec3.new(50, 1e5, 81.6),     ZeroVec,vec3.new(0.75,0.75,0.75),DIFF) );//Bottomm
    sph.add( SphereClass.Create(1e5, vec3.new(50,-1e5+81.6,81.6), ZeroVec,vec3.new(0.75,0.75,0.75),DIFF) );//Top
    sph.add( SphereClass.Create(16.5,vec3.new(27,16.5,47),        ZeroVec,vec3.new(1,1,1)*0.999, SPEC) );//Mirror
-   sph.add( SphereClass.Create(16.5,vec3.new(73,16.5,88),        ZeroVec,vec3.new(1,1,1)*0.999, REFR) );//Glass
+   sph.add( SphereClass.Create(16.5,vec3.new(73,16.5,78),        ZeroVec,vec3.new(1,1,1)*0.999, REFR) );//Glass
    sph.add( SphereClass.Create(600, vec3.new(50,681.6-0.27,81.6),vec3.new(12,12,12),    ZeroVec,DIFF) );//Ligth
    sc.scList.add(sph);
 end;

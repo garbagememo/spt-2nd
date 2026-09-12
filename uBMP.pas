@@ -9,19 +9,11 @@ uses
    FPReadPNG,FPReadJPEG,FPReadPNM,FPReadBMP;
 
 type
-   rgbColor = record
-      r,g,b:word;
-   end;
-
-   BMPArray = array of rgbColor;
    BMPRecord=record
-      bmpBodySize:longint;
-      BMPWidth,BMPHeight:longint;
-
-      bmpBody:BMPArray;
+      image:TFPMemoryImage;
       procedure new(x,y:integer);
-      procedure SetPixel(x,y:integer;col:rgbColor);
-      function GetPixel(x,y:integer):rgbColor;
+      procedure SetPixel(x,y:integer;col:TFPColor);
+      function GetPixel(x,y:integer):TFPColor;
       
       // 自動判定用の統一書き出しメソッド
       procedure WriteFile(FN: string);
@@ -34,19 +26,17 @@ implementation
 
 procedure BMPRecord.new(x,y:longint);
 begin
-   Setlength(BMPBody,x*y);
-   BMPWidth:=x;BMPHeight:=y;
-   bmpBodySize:=length(BMPBody)*sizeof(rgbColor);
+   image := TFPMemoryImage.Create (x,y);
 end;
 
-procedure BMPRecord.SetPixel(x,y:integer;col:rgbColor);
+procedure BMPRecord.SetPixel(x,y:integer;col:TFPColor);
 begin
-   bmpBody[y*BMPWidth+x]:=col;
+   image.colors[x,y]:=col;
 end;
 
-function BMPRecord.GetPixel(x,y:integer):rgbColor;
+function BMPRecord.GetPixel(x,y:integer):TFPColor;
 begin
-   result:=bmpBody[y*BMPWidth+x];
+   result:=image.colors[x,y];
 end;
 
 // ----------------------------------------------------
@@ -54,17 +44,9 @@ end;
 // ----------------------------------------------------
 procedure BMPRecord.WriteFile(FN: string);
 var
-   image:TFPMemoryImage;
    Ext: String;
    Writer: TFPCustomImageWriter;
-   x,y:integer;
 begin
-   image := TFPMemoryImage.Create (bmpWidth,bmpHeight);
-   for y:=0 to bmpHeight-1 do
-      for x:=0 to bmpWidth-1 do 
-         image.colors[x,bmpHeight-y-1]:=FPColor(bmpBody[y*bmpWidth+x].r, 
-                                                bmpBody[y*bmpWidth+x].g, 
-                                                bmpBody[y*bmpWidth+x].b);
    
    Ext := LowerCase(ExtractFileExt(FN));
    Writer := nil;
@@ -101,11 +83,9 @@ end;
 procedure BMPRecord.ReadFile(FN:string);
 var
    Ext:string;
-   myImage: TFPMemoryImage;
    reader : TFPCustomImageReader;
-   x,y:integer;
 begin
-   myImage := TFPMemoryImage.Create(0, 0);
+   Image := TFPMemoryImage.Create(0, 0);
    Ext := LowerCase(ExtractFileExt(FN));
    reader := nil;
 
@@ -127,22 +107,13 @@ begin
       Halt(0);
    end;
    try
-      myImage.LoadFromFile(FN, reader);
-      self.new(myImage.width,myImage.height);
-      for y:=0 to MyImage.Height-1 do begin
-         for x:=0 to myImage.width-1 do begin
-            bmpBody[(y*bmpWidth+x)].r:=myImage.colors[x,bmpHeight-y-1].red;
-            bmpBody[(y*bmpWidth+x)].g:=myImage.colors[x,bmpHeight-y-1].Green;
-            bmpBody[(y*bmpWidth+x)].b:=myImage.colors[x,bmpHeight-y-1].Blue;
-         end;
-      end;
+      Image.LoadFromFile(FN, reader);
    except
       on E: Exception do
          WriteLn('Error loading file: ', E.Message);
    end;
 
    reader.Free;
-   myImage.Free;
 end;
 
 
